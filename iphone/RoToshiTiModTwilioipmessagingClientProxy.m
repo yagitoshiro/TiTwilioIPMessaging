@@ -26,16 +26,11 @@
 
 -(void)addToMyChannels:(TWMChannel *)channel
 {
-    NSLog(@"[INFO] start add to my channels");
     if(nil == _myChannels){
-        NSLog(@"[INFO] myChannels is nil");
         _myChannels = [[NSMutableDictionary alloc] init];
     }
-    NSLog(@"[INFO] my channels");
     NSString *sid = [channel sid];
-    NSLog(@"[INFO] set value to mychannels");
     [_myChannels setObject:channel forKey:sid];
-    NSLog(@"[INFO] end");
 }
 
 -(void)initClient:(id)args
@@ -101,22 +96,15 @@
         TWMChannel *channel = [self getChannel:[args objectForKey:@"channel"] fromChannelList:channelsList];
         [channel joinWithCompletion:^(TWMResult result) {
             if(result == TWMResultSuccess){
-                NSLog(@"[INFO] mychannel");
                 [self addToMyChannels:channel];
-                NSLog(@"[INFO] mychannel end");
                 
-                NSLog(@"[INFO] messages");
                 NSArray *messages = channel.messages.allObjects;
                 NSMutableArray *msgs = [[NSMutableArray alloc] init];
-                NSLog(@"[INFO] messages ready");
                 for (id message in messages) {
-                    NSLog(@"[INFO] message found");
                     [msgs addObject:[self messageToDict:message]];
                 }
-                NSLog(@"[INFO] ready to respond");
                 NSDictionary *data = @{@"messages": msgs, @"channel": [self channelToDict:channel]};
                 KrollCallback *success = [args objectForKey:@"success"];
-                NSLog(@"[INFO] finish");
                 [self _fireEventToListener:@"success" withObject:data listener:success thisObject:nil];
             }else{
                 if([args objectForKey:@"error"]){
@@ -176,23 +164,14 @@
     
     [_client channelsListWithCompletion:^(TWMResult result, TWMChannels *channelsList) {
         [channelsList createChannelWithOptions:options completion:^(TWMResult result, TWMChannel *channel) {
-            NSLog(@"[INFO] debug 9");
             KrollCallback *success = [args objectForKey:@"success"];
             if(result == TWMResultSuccess){
-                
-                
-                NSLog(@"[INFO] debug 10");
                 NSDictionary *channelData = [self channelToDict:channel];
-
-                NSLog(@"[INFO] debug 11");
                 [self _fireEventToListener:@"success" withObject:channelData listener:success thisObject:nil];
-                NSLog(@"[INFO] debug 12");
             }else{
-                NSLog(@"[INFO] debug 13");
                 if([args objectForKey:@"error"]){
                     KrollCallback *error = [args objectForKey:@"error"];
                     [self _fireEventToListener:@"error" withObject:nil listener:error thisObject:nil];
-                    NSLog(@"[INFO] debug 14");
                 }
             }
         }];
@@ -230,16 +209,12 @@
         if(result == TWMResultSuccess){
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [channelsList loadChannelsWithCompletion:^(TWMResult result) {
-                    NSLog(@"retrieve channel list start");
                     NSMutableArray *list = [[NSMutableArray alloc] init];
                     for (id channel in [channelsList allObjects]) {
                         if(channel){
-                            NSLog(@"add channel to list");
                             [list addObject:[self channelToDict:channel]];
                             NSInteger status = [channel status];
                             if(status == TWMChannelStatusJoined){
-                                NSLog(@"add channel to myChannels");
-                                NSLog(@"[INFO] channel sid: %@", [channel sid]);
                                 [self addToMyChannels:channel];
                             }
                         }
@@ -470,14 +445,12 @@
 
 -(void)accessManager:(TwilioAccessManager *)accessManager error:(NSError *)error
 {
-    NSLog(@"[INFO] access manager error");
     NSDictionary *dict = @{@"message": [error localizedDescription]};
     [self fireEvent:@"accessManagerError" withObject:dict];
 }
 
 -(void)accessManagerTokenExpired:(TwilioAccessManager *)accessManager
 {
-    NSLog(@"[INFO] access manager token expired");
     [accessManager updateToken:_token];
 }
 
