@@ -1,3 +1,4 @@
 TwilioCommon.framework
 TwilioIPMessagingClient.framework
 .DS_Store
+/iphone/build
